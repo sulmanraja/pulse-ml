@@ -1,4 +1,11 @@
-import { DashboardSnapshot, DeploymentEvent, Incident, ModelSummary } from '@pulseml/shared';
+import {
+  DashboardSnapshot,
+  DeploymentEvent,
+  Incident,
+  IncidentFilters,
+  IncidentRelatedDeployment,
+  ModelSummary
+} from '@pulseml/shared';
 
 const models: ModelSummary[] = [
   {
@@ -111,8 +118,26 @@ export function getModels(): ModelSummary[] {
   return models;
 }
 
-export function getIncidents(): Incident[] {
-  return incidents;
+export function getIncidents(filters: IncidentFilters = {}): Incident[] {
+  return getCorrelatedIncidents().filter((incident) => {
+    if (filters.severity && incident.severity !== filters.severity) {
+      return false;
+    }
+
+    if (filters.status && incident.status !== filters.status) {
+      return false;
+    }
+
+    if (filters.modelId && incident.modelId !== filters.modelId) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+export function getIncidentById(id: string): Incident | undefined {
+  return getCorrelatedIncidents().find((incident) => incident.id === id);
 }
 
 export function getDeployments(): DeploymentEvent[] {
@@ -122,16 +147,67 @@ export function getDeployments(): DeploymentEvent[] {
 export function getDashboard(): DashboardSnapshot {
   const healthyModels = models.filter((m) => m.status === 'healthy').length;
   const hourlyCost = models.reduce((sum, model) => sum + model.costPerHour, 0);
+  const correlatedIncidents = getCorrelatedIncidents();
   return {
     summary: {
       totalModels: models.length,
       healthyModels,
-      openIncidents: incidents.filter((i) => i.status !== 'resolved').length,
+      openIncidents: correlatedIncidents.filter((i) => i.status !== 'resolved').length,
       criticalAlerts: models.filter((m) => m.status === 'critical').length,
       hourlyCost
     },
     models,
-    incidents,
+    incidents: correlatedIncidents,
     deployments
   };
+}
+
+function getCorrelatedIncidents(): Incident[] {
+  return incidents.map((incident) => ({
+    ...incident,
+    relatedDeployment: getNearestRelatedDeployment(incident)
+  }));
+}
+
+function getNearestRelatedDeployment(incident: Incident): IncidentRelatedDeployment | undefined {
+  const incidentTime = parseSeedTimestamp(incident.startedAt);
+  const matchingDeployments = deployments
+    .filter((deployment) => deployment.modelId === incident.modelId)
+    .map((deployment) => ({
+      deployment,
+      distance: Math.abs(parseSeedTimestamp(deployment.deployedAt) - incidentTime)
+    }))
+    .sort((left, right) => left.distance - right.distance);
+
+  const match = matchingDeployments[0]?.deployment;
+  if (!match) {
+    return undefined;
+  }
+
+  return {
+    id: match.id,
+    version: match.version,
+    deployedAt: match.deployedAt,
+    rolloutPercent: match.rolloutPercent,
+    riskLevel: match.riskLevel
+  };
+}
+
+function parseSeedTimestamp(value: string): number {
+  const match = value.match(
+    /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2}) (?<hour>\d{2}):(?<minute>\d{2}) [A-Z]{2}$/
+  );
+
+  if (!match?.groups) {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  const { year, month, day, hour, minute } = match.groups;
+  return Date.UTC(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    Number(hour),
+    Number(minute)
+  );
 }

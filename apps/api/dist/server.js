@@ -18,8 +18,21 @@ app.get('/dashboard', (_req, res) => {
 app.get('/models', (_req, res) => {
     res.json((0, data_1.getModels)());
 });
-app.get('/incidents', (_req, res) => {
-    res.json((0, data_1.getIncidents)());
+app.get('/incidents', (req, res) => {
+    const filters = getIncidentFilters(req.query);
+    if (!filters) {
+        res.status(400).json({ error: 'Invalid incident filters' });
+        return;
+    }
+    res.json((0, data_1.getIncidents)(filters));
+});
+app.get('/incidents/:id', (req, res) => {
+    const incident = (0, data_1.getIncidentById)(req.params.id);
+    if (!incident) {
+        res.status(404).json({ error: 'Incident not found' });
+        return;
+    }
+    res.json(incident);
 });
 app.get('/deployments', (_req, res) => {
     res.json((0, data_1.getDeployments)());
@@ -28,3 +41,37 @@ const port = Number(process.env.PORT ?? 4000);
 app.listen(port, () => {
     console.log(`PulseML API listening on http://localhost:${port}`);
 });
+function getIncidentFilters(query) {
+    const severity = getEnumValue(query.severity, ['info', 'warning', 'critical']);
+    const status = getEnumValue(query.status, ['investigating', 'mitigating', 'resolved']);
+    const modelId = getOptionalString(query.modelId);
+    if (query.severity !== undefined && severity === null) {
+        return null;
+    }
+    if (query.status !== undefined && status === null) {
+        return null;
+    }
+    if (query.modelId !== undefined && modelId === null) {
+        return null;
+    }
+    return {
+        severity: severity ?? undefined,
+        status: status ?? undefined,
+        modelId: modelId ?? undefined
+    };
+}
+function getEnumValue(value, allowed) {
+    if (value === undefined || value === '') {
+        return undefined;
+    }
+    if (typeof value !== 'string') {
+        return null;
+    }
+    return allowed.includes(value) ? value : null;
+}
+function getOptionalString(value) {
+    if (value === undefined || value === '') {
+        return undefined;
+    }
+    return typeof value === 'string' ? value : null;
+}

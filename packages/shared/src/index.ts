@@ -1,4 +1,6 @@
 export type HealthStatus = 'healthy' | 'warning' | 'critical';
+export type IncidentSeverity = 'info' | 'warning' | 'critical';
+export type IncidentStatus = 'investigating' | 'mitigating' | 'resolved';
 
 export interface ModelSummary {
   id: string;
@@ -12,17 +14,32 @@ export interface ModelSummary {
   status: HealthStatus;
 }
 
+export interface IncidentRelatedDeployment {
+  id: string;
+  version: string;
+  deployedAt: string;
+  rolloutPercent: number;
+  riskLevel: HealthStatus;
+}
+
 export interface Incident {
   id: string;
   title: string;
   modelId: string;
   modelName: string;
-  severity: 'info' | 'warning' | 'critical';
-  status: 'investigating' | 'mitigating' | 'resolved';
+  severity: IncidentSeverity;
+  status: IncidentStatus;
   owner: string;
   startedAt: string;
   suspectedCause: string;
   description: string;
+  relatedDeployment?: IncidentRelatedDeployment;
+}
+
+export interface IncidentFilters {
+  severity?: IncidentSeverity;
+  status?: IncidentStatus;
+  modelId?: string;
 }
 
 export interface DeploymentEvent {

@@ -4,7 +4,11 @@
     "outDir": "dist",
     "rootDir": "src",
     "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    "moduleResolution": "NodeNext",
+    "baseUrl": ".",
+    "paths": {
+      "@pulseml/shared": ["../../packages/shared/dist/index.d.ts"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

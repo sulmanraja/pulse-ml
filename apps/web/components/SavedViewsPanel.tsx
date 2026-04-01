@@ -2,21 +2,25 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { CreateSavedDashboardViewInput, IncidentFilters, SavedDashboardView } from '@pulseml/shared';
+import { CreateSavedDashboardViewInput, DemoRole, IncidentFilters, SavedDashboardView } from '@pulseml/shared';
 import { apiPost } from './api';
+import { buildRoleHref, canSaveViews } from './demoRole';
 
 export function SavedViewsPanel({
   currentFilters,
-  initialViews
+  initialViews,
+  role
 }: {
   currentFilters: IncidentFilters;
   initialViews: SavedDashboardView[];
+  role: DemoRole;
 }) {
   const router = useRouter();
   const [views, setViews] = useState(initialViews);
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const canSave = canSaveViews(role);
 
   const activeQueryString = useMemo(() => buildIncidentQueryString(currentFilters), [currentFilters]);
 
@@ -54,26 +58,36 @@ export function SavedViewsPanel({
       <div className="section-heading">
         <div>
           <h3 className="tooltip-label" title="Named filter presets for the incidents page, stored in the demo API's in-memory repository.">Saved Views</h3>
-          <p className="muted section-subtitle">Store the current incident filters as a reusable demo-mode preset.</p>
+          <p className="muted section-subtitle">
+            {canSave
+              ? 'Store the current incident filters as a reusable demo-mode preset.'
+              : 'This role can load saved views, but creating new presets is reserved for ML Engineer and Admin demo roles.'}
+          </p>
         </div>
-        <div className="section-chip">In-memory</div>
+        <div className="section-chip">{canSave ? 'In-memory' : 'Read only'}</div>
       </div>
 
-      <form className="saved-view-form" onSubmit={handleSave}>
-        <label className="filter-field">
-          <span className="muted tooltip-label" title="The label used to save and later reload this exact incident filter state.">View name</span>
-          <input
-            className="input"
-            name="name"
-            placeholder="Critical payments triage"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-        </label>
-        <button className="button" type="submit" disabled={isPending}>
-          {isPending ? 'Saving…' : 'Save current view'}
-        </button>
-      </form>
+      {canSave ? (
+        <form className="saved-view-form" onSubmit={handleSave}>
+          <label className="filter-field">
+            <span className="muted tooltip-label" title="The label used to save and later reload this exact incident filter state.">View name</span>
+            <input
+              className="input"
+              name="name"
+              placeholder="Critical payments triage"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </label>
+          <button className="button" type="submit" disabled={isPending}>
+            {isPending ? 'Saving…' : 'Save current view'}
+          </button>
+        </form>
+      ) : (
+        <div className="saved-views-readonly">
+          <div className="muted">Switch to ML Engineer or Admin in demo mode to save new dashboard views.</div>
+        </div>
+      )}
 
       {error ? <p className="saved-view-error">{error}</p> : null}
 
@@ -85,7 +99,7 @@ export function SavedViewsPanel({
         <div className="saved-views-list">
           {views.map((view) => {
             const queryString = buildIncidentQueryString(view.state.incidents);
-            const href = `/incidents${queryString ? `?${queryString}` : ''}`;
+            const href = buildRoleHref('/incidents', role, queryString ? Object.fromEntries(new URLSearchParams(queryString).entries()) : undefined);
             const isActive = queryString === activeQueryString;
 
             return (

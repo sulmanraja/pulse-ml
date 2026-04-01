@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { DriftAnalysisSnapshot, DriftTimeframe, ModelSummary } from '@pulseml/shared';
 import { apiFetch } from '../../components/api';
 import { EmptyState } from '../../components/EmptyState';
+import { buildRoleHref, getDemoRole, getDemoRoleMeta } from '../../components/demoRole';
 
 type DriftPageProps = {
   searchParams?: Promise<{
@@ -9,6 +10,7 @@ type DriftPageProps = {
     timeframe?: string;
     metricType?: string;
     metricKey?: string;
+    role?: string;
   }>;
 };
 
@@ -18,6 +20,8 @@ export default async function DriftPage({ searchParams }: DriftPageProps) {
   const modelId = typeof params.modelId === 'string' ? params.modelId : undefined;
   const metricType = params.metricType === 'prediction' ? 'prediction' : params.metricType === 'feature' ? 'feature' : undefined;
   const metricKey = typeof params.metricKey === 'string' ? params.metricKey : undefined;
+  const role = getDemoRole(params.role);
+  const roleMeta = getDemoRoleMeta(role);
 
   const query = new URLSearchParams();
   if (modelId) {
@@ -46,11 +50,15 @@ export default async function DriftPage({ searchParams }: DriftPageProps) {
           <h2 className="title">Drift Analysis</h2>
           <p className="subtitle">Feature and prediction drift with model-level filtering and metric drill-down.</p>
         </div>
-        <div className="badge info">Demo mode · seeded drift data</div>
+        <div className="overview-header-meta">
+          <div className="badge info">Demo mode · seeded drift data</div>
+          <div className="muted">{roleMeta.label}</div>
+        </div>
       </header>
 
       <section className="card filter-card">
         <form className="drift-filters" method="get">
+          <input type="hidden" name="role" value={role} />
           <label className="filter-field">
             <span
               className="muted tooltip-label"
@@ -87,6 +95,22 @@ export default async function DriftPage({ searchParams }: DriftPageProps) {
         </form>
       </section>
 
+      {role === 'data-scientist' || role === 'admin' ? null : (
+        <section className="card">
+          <div className="section-heading">
+            <div>
+              <h3 className="tooltip-label" title="This note explains how Drift Analysis is positioned for the currently selected demo role.">Role-aware analysis note</h3>
+              <p className="muted section-subtitle">
+                {role === 'ml-engineer'
+                  ? 'ML Engineers can inspect drift to connect behavior changes with active incidents.'
+                  : 'Platform Engineers can review drift context here, but the main operational path stays centered on incidents and deployments.'}
+              </p>
+            </div>
+            <div className="section-chip">{roleMeta.label}</div>
+          </div>
+        </section>
+      )}
+
       <section className="grid grid-2 drift-main-grid">
         <div className="card">
           <div className="section-heading">
@@ -119,7 +143,7 @@ export default async function DriftPage({ searchParams }: DriftPageProps) {
                     <td>
                       <Link
                         className="table-link"
-                        href={buildDriftHref(snapshot.modelId, snapshot.timeframe, 'feature', metric.feature)}
+                        href={buildDriftHref(snapshot.modelId, snapshot.timeframe, 'feature', metric.feature, role)}
                       >
                         {metric.feature}
                       </Link>
@@ -166,7 +190,7 @@ export default async function DriftPage({ searchParams }: DriftPageProps) {
                     <td>
                       <Link
                         className="table-link"
-                        href={buildDriftHref(snapshot.modelId, snapshot.timeframe, 'prediction', metric.metric)}
+                        href={buildDriftHref(snapshot.modelId, snapshot.timeframe, 'prediction', metric.metric, role)}
                       >
                         {metric.metric}
                       </Link>
@@ -300,16 +324,15 @@ function buildDriftHref(
   modelId: string,
   timeframe: DriftTimeframe,
   metricType: 'feature' | 'prediction',
-  metricKey: string
+  metricKey: string,
+  role: ReturnType<typeof getDemoRole>
 ) {
-  const params = new URLSearchParams({
+  return buildRoleHref('/drift', role, {
     modelId,
     timeframe,
     metricType,
     metricKey
   });
-
-  return `/drift?${params.toString()}`;
 }
 
 function getHealthClass(status: 'healthy' | 'warning' | 'critical'): 'ok' | 'warn' | 'critical' {

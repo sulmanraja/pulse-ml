@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: pulseml-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pulseml
+      POSTGRES_USER: pulseml
+      POSTGRES_PASSWORD: pulseml
+    ports:
+      - "5432:5432"
+    volumes:
+      - pulseml_postgres:/var/lib/postgresql/data
+volumes:
+  pulseml_postgres:

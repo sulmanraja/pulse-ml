@@ -53,7 +53,7 @@ export function SavedViewsPanel({
     <section className="card saved-views-card">
       <div className="section-heading">
         <div>
-          <h3>Saved Views</h3>
+          <h3 className="tooltip-label" title="Named filter presets for the incidents page, stored in the demo API's in-memory repository.">Saved Views</h3>
           <p className="muted section-subtitle">Store the current incident filters as a reusable demo-mode preset.</p>
         </div>
         <div className="section-chip">In-memory</div>
@@ -61,7 +61,7 @@ export function SavedViewsPanel({
 
       <form className="saved-view-form" onSubmit={handleSave}>
         <label className="filter-field">
-          <span className="muted">View name</span>
+          <span className="muted tooltip-label" title="The label used to save and later reload this exact incident filter state.">View name</span>
           <input
             className="input"
             name="name"

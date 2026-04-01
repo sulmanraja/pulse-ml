@@ -21,13 +21,13 @@ export default async function ModelsPage() {
         <table className="table">
           <thead>
             <tr>
-              <th>Model</th>
-              <th>Use case</th>
-              <th>Latency P95</th>
-              <th>Traffic</th>
-              <th>Drift</th>
-              <th>Cost/hr</th>
-              <th>Status</th>
+              <th className="tooltip-label" title="The production model currently being monitored.">Model</th>
+              <th className="tooltip-label" title="The primary use case or ML task handled by the model.">Use case</th>
+              <th className="tooltip-label" title="95th percentile inference latency for this model.">Latency P95</th>
+              <th className="tooltip-label" title="Observed request volume in queries per second.">Traffic</th>
+              <th className="tooltip-label" title="A high-level drift score summarizing distribution shift from baseline.">Drift</th>
+              <th className="tooltip-label" title="Estimated hourly serving cost for the model.">Cost/hr</th>
+              <th className="tooltip-label" title="Overall health classification derived from operational signals.">Status</th>
             </tr>
           </thead>
           <tbody>

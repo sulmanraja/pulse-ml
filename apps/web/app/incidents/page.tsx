@@ -54,7 +54,7 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
       <section className="card filter-card">
         <form className="incident-filters" method="get">
           <label className="filter-field">
-            <span className="muted">Severity</span>
+            <span className="muted tooltip-label" title="Filter incidents by impact level, from informational to critical.">Severity</span>
             <select name="severity" defaultValue={severity ?? ''} className="select">
               <option value="">All severities</option>
               <option value="critical">Critical</option>
@@ -64,7 +64,7 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
           </label>
 
           <label className="filter-field">
-            <span className="muted">Status</span>
+            <span className="muted tooltip-label" title="Filter by the current workflow stage of the incident response.">Status</span>
             <select name="status" defaultValue={status ?? ''} className="select">
               <option value="">All statuses</option>
               <option value="investigating">Investigating</option>
@@ -74,7 +74,7 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
           </label>
 
           <label className="filter-field">
-            <span className="muted">Model</span>
+            <span className="muted tooltip-label" title="Filter incidents down to a single impacted model.">Model</span>
             <select name="modelId" defaultValue={modelId ?? ''} className="select">
               <option value="">All models</option>
               {models.map((model) => (
@@ -97,7 +97,7 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
       <section className="card incidents-results-card">
         <div className="section-heading">
           <div>
-            <h3>Incident Queue</h3>
+            <h3 className="tooltip-label" title="The current incident queue after server-side filtering by severity, status, and model.">Incident Queue</h3>
             <p className="muted section-subtitle">{incidents.length} incidents match the current filters.</p>
           </div>
           <div className="section-chip">Server-filtered</div>
@@ -133,11 +133,11 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
 
                 <div className="incident-row-grid">
                   <div>
-                    <div className="muted incident-label">Suspected cause</div>
+                    <div className="muted incident-label tooltip-label" title="The most likely cause currently suspected by responders or backend correlation logic.">Suspected cause</div>
                     <div>{incident.suspectedCause}</div>
                   </div>
                   <div>
-                    <div className="muted incident-label">Correlated deployment</div>
+                    <div className="muted incident-label tooltip-label" title="The nearest related deployment event for the same model, surfaced by backend correlation logic.">Correlated deployment</div>
                     {incident.relatedDeployment ? (
                       <div className="deployment-correlation">
                         <span className={`badge ${getHealthClass(incident.relatedDeployment.riskLevel)}`}>

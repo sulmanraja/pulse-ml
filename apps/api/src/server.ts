@@ -3,11 +3,13 @@ import express from 'express';
 import {
   CreateSavedDashboardViewInput,
   DashboardViewState,
+  DriftFilters,
+  DriftTimeframe,
   IncidentFilters,
   IncidentSeverity,
   IncidentStatus
 } from '@pulseml/shared';
-import { getDashboard, getDeployments, getIncidentById, getIncidents, getModels } from './data';
+import { getDashboard, getDeployments, getDriftAnalysis, getIncidentById, getIncidents, getModels } from './data';
 import { savedDashboardViewsRepository } from './savedViews';
 
 const app = express();
@@ -48,6 +50,16 @@ app.get('/incidents/:id', (req, res) => {
 
 app.get('/deployments', (_req, res) => {
   res.json(getDeployments());
+});
+
+app.get('/drift', (req, res) => {
+  const filters = getDriftFilters(req.query);
+  if (!filters) {
+    res.status(400).json({ error: 'Invalid drift filters' });
+    return;
+  }
+
+  res.json(getDriftAnalysis(filters));
 });
 
 app.get('/saved-views', (_req, res) => {
@@ -121,6 +133,41 @@ function getCreateSavedDashboardViewInput(value: unknown): CreateSavedDashboardV
     state: {
       incidents: incidents ?? {}
     }
+  };
+}
+
+function getDriftFilters(query: {
+  modelId?: unknown;
+  timeframe?: unknown;
+  metricType?: unknown;
+  metricKey?: unknown;
+}): DriftFilters | null {
+  const modelId = getOptionalString(query.modelId);
+  const timeframe = getEnumValue<DriftTimeframe>(query.timeframe, ['24h', '7d', '30d']);
+  const metricType = getEnumValue<'feature' | 'prediction'>(query.metricType, ['feature', 'prediction']);
+  const metricKey = getOptionalString(query.metricKey);
+
+  if (query.modelId !== undefined && modelId === null) {
+    return null;
+  }
+
+  if (query.timeframe !== undefined && timeframe === null) {
+    return null;
+  }
+
+  if (query.metricType !== undefined && metricType === null) {
+    return null;
+  }
+
+  if (query.metricKey !== undefined && metricKey === null) {
+    return null;
+  }
+
+  return {
+    modelId: modelId ?? undefined,
+    timeframe: timeframe ?? undefined,
+    metricType: metricType ?? undefined,
+    metricKey: metricKey ?? undefined
   };
 }
 

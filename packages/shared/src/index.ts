@@ -1,6 +1,7 @@
 export type HealthStatus = 'healthy' | 'warning' | 'critical';
 export type IncidentSeverity = 'info' | 'warning' | 'critical';
 export type IncidentStatus = 'investigating' | 'mitigating' | 'resolved';
+export type DriftTimeframe = '24h' | '7d' | '30d';
 
 export interface ModelSummary {
   id: string;
@@ -56,6 +57,60 @@ export interface SavedDashboardView {
 export interface CreateSavedDashboardViewInput {
   name: string;
   state: DashboardViewState;
+}
+
+export interface DriftFilters {
+  modelId?: string;
+  timeframe?: DriftTimeframe;
+  metricType?: 'feature' | 'prediction';
+  metricKey?: string;
+}
+
+export interface DriftSeriesPoint {
+  label: string;
+  value: number;
+  threshold: number;
+}
+
+export interface FeatureDriftMetric {
+  feature: string;
+  psi: number;
+  status: HealthStatus;
+  topShift: string;
+}
+
+export interface PredictionDriftMetric {
+  metric: string;
+  currentValue: number;
+  baselineValue: number;
+  deltaPct: number;
+  status: HealthStatus;
+}
+
+export interface DriftDrilldownSlice {
+  slice: string;
+  value: number;
+  deltaPct: number;
+}
+
+export interface DriftDrilldown {
+  metricType: 'feature' | 'prediction';
+  metricKey: string;
+  title: string;
+  summary: string;
+  recommendedAction: string;
+  affectedSlices: DriftDrilldownSlice[];
+}
+
+export interface DriftAnalysisSnapshot {
+  modelId: string;
+  modelName: string;
+  timeframe: DriftTimeframe;
+  featureDrift: FeatureDriftMetric[];
+  predictionDrift: PredictionDriftMetric[];
+  featureTrend: DriftSeriesPoint[];
+  predictionTrend: DriftSeriesPoint[];
+  drilldown: DriftDrilldown;
 }
 
 export interface DeploymentEvent {

@@ -27,24 +27,28 @@ export default async function OverviewPage() {
           title="Fleet health"
           value={`${data.summary.healthyModels}/${data.summary.totalModels}`}
           subtitle={`${degradedModels} models need attention`}
+          description="Shows how many production models are currently healthy compared with the total monitored fleet."
           tone={degradedModels > 0 ? 'warn' : 'ok'}
         />
         <MetricCard
           title="Open incidents"
           value={`${data.summary.openIncidents}`}
           subtitle="Investigating and mitigating now"
+          description="Counts unresolved incidents that are still under investigation or mitigation."
           tone={data.summary.openIncidents > 0 ? 'critical' : 'ok'}
         />
         <MetricCard
           title="Critical exposure"
           value={`${criticalModels}`}
           subtitle="Models in critical health state"
+          description="Counts models whose current health status is critical based on backend summary logic."
           tone={criticalModels > 0 ? 'critical' : 'ok'}
         />
         <MetricCard
           title="Hourly cost"
           value={`$${data.summary.hourlyCost.toFixed(0)}`}
           subtitle="Estimated aggregate inference spend"
+          description="Estimated total hourly serving cost across all monitored models in the demo snapshot."
           tone="info"
         />
       </section>
@@ -53,7 +57,7 @@ export default async function OverviewPage() {
         <div className="card overview-card">
           <div className="section-heading">
             <div>
-              <h3>Model Health Snapshot</h3>
+              <h3 className="tooltip-label" title="A compact operational table of the most important health signals for each monitored model.">Model Health Snapshot</h3>
               <p className="muted section-subtitle">Fast scan of latency, reliability, drift, and cost.</p>
             </div>
             <div className="section-chip">Operational view</div>
@@ -67,13 +71,13 @@ export default async function OverviewPage() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Model</th>
-                  <th>Use case</th>
-                  <th>Latency</th>
-                  <th>Error</th>
-                  <th>Drift</th>
-                  <th>Cost/hr</th>
-                  <th>Status</th>
+                  <th className="tooltip-label" title="The production model currently being monitored.">Model</th>
+                  <th className="tooltip-label" title="The business or ML task this model supports.">Use case</th>
+                  <th className="tooltip-label" title="P95 inference latency, a practical indicator of tail response performance.">Latency</th>
+                  <th className="tooltip-label" title="Observed request error rate for the model endpoint.">Error</th>
+                  <th className="tooltip-label" title="A compact drift score summarizing how far current data differs from baseline.">Drift</th>
+                  <th className="tooltip-label" title="Estimated hourly serving cost for this model.">Cost/hr</th>
+                  <th className="tooltip-label" title="Health severity derived from the model's key operational signals.">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -102,7 +106,7 @@ export default async function OverviewPage() {
           <div className="card overview-card">
             <div className="section-heading">
               <div>
-                <h3>Recent Incidents</h3>
+                <h3 className="tooltip-label" title="Recent active incidents with ownership, status, and deployment context for quick triage.">Recent Incidents</h3>
                 <p className="muted section-subtitle">Ownership and suspected causes for active issues.</p>
               </div>
               <div className="section-chip">Triage</div>
@@ -150,7 +154,7 @@ export default async function OverviewPage() {
           <div className="card overview-card">
             <div className="section-heading">
               <div>
-                <h3>Recent Deployments</h3>
+                <h3 className="tooltip-label" title="Recent release events so operators can quickly correlate model health changes with deployments.">Recent Deployments</h3>
                 <p className="muted section-subtitle">Release timing and rollout risk for recent changes.</p>
               </div>
               <div className="section-chip">Change log</div>

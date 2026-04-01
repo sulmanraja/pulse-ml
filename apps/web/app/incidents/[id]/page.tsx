@@ -47,7 +47,7 @@ export default async function IncidentDetailPage({ params }: IncidentDetailPageP
         <div className="card">
           <div className="section-heading">
             <div>
-              <h3>Incident Context</h3>
+              <h3 className="tooltip-label" title="Core incident metadata used during triage, including timing, owner, impacted model, and suspected cause.">Incident Context</h3>
               <p className="muted section-subtitle">Core timestamps, ownership, and suspected root-cause signal.</p>
             </div>
             <div className="section-chip">Triage</div>
@@ -63,7 +63,7 @@ export default async function IncidentDetailPage({ params }: IncidentDetailPageP
           </div>
 
           <div className="incident-detail-copy">
-            <div className="muted incident-label">Summary</div>
+            <div className="muted incident-label tooltip-label" title="A concise description of the observed user or system impact for this incident.">Summary</div>
             <p>{incident.description}</p>
           </div>
         </div>
@@ -71,7 +71,7 @@ export default async function IncidentDetailPage({ params }: IncidentDetailPageP
         <div className="card">
           <div className="section-heading">
             <div>
-              <h3>Deployment Correlation</h3>
+              <h3 className="tooltip-label" title="The nearest related deployment surfaced by backend correlation logic to help connect incidents with recent changes.">Deployment Correlation</h3>
               <p className="muted section-subtitle">Nearest related deployment surfaced by the backend correlation helper.</p>
             </div>
             <div className="section-chip">Change context</div>

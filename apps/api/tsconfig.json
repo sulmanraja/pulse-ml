@@ -7,7 +7,7 @@
     "moduleResolution": "NodeNext",
     "baseUrl": ".",
     "paths": {
-      "@pulseml/shared": ["../../packages/shared/dist/index"]
+      "@pulseml/shared": ["../../packages/shared/dist/index.d.ts"]
     }
   },
   "include": ["src/**/*.ts"]

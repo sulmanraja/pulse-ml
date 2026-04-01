@@ -21,12 +21,12 @@ export default async function DeploymentsPage() {
         <table className="table">
           <thead>
             <tr>
-              <th>Model</th>
-              <th>Version</th>
-              <th>Time</th>
-              <th>Rollout</th>
-              <th>Risk</th>
-              <th>Notes</th>
+              <th className="tooltip-label" title="The model affected by the deployment event.">Model</th>
+              <th className="tooltip-label" title="The deployed model or prompt version identifier.">Version</th>
+              <th className="tooltip-label" title="When the deployment was rolled out in the demo timeline.">Time</th>
+              <th className="tooltip-label" title="The percentage of serving traffic receiving the new version.">Rollout</th>
+              <th className="tooltip-label" title="A risk estimate attached to the deployment event for release monitoring.">Risk</th>
+              <th className="tooltip-label" title="Operator-facing notes describing what changed in the deployment.">Notes</th>
             </tr>
           </thead>
           <tbody>

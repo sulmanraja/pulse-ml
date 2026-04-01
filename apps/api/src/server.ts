@@ -1,7 +1,14 @@
 import cors from 'cors';
 import express from 'express';
-import { IncidentFilters, IncidentSeverity, IncidentStatus } from '@pulseml/shared';
+import {
+  CreateSavedDashboardViewInput,
+  DashboardViewState,
+  IncidentFilters,
+  IncidentSeverity,
+  IncidentStatus
+} from '@pulseml/shared';
 import { getDashboard, getDeployments, getIncidentById, getIncidents, getModels } from './data';
+import { savedDashboardViewsRepository } from './savedViews';
 
 const app = express();
 app.use(cors());
@@ -43,12 +50,30 @@ app.get('/deployments', (_req, res) => {
   res.json(getDeployments());
 });
 
+app.get('/saved-views', (_req, res) => {
+  res.json(savedDashboardViewsRepository.list());
+});
+
+app.post('/saved-views', (req, res) => {
+  const input = getCreateSavedDashboardViewInput(req.body);
+  if (!input) {
+    res.status(400).json({ error: 'Invalid saved view payload' });
+    return;
+  }
+
+  res.status(201).json(savedDashboardViewsRepository.create(input));
+});
+
 const port = Number(process.env.PORT ?? 4000);
 app.listen(port, () => {
   console.log(`PulseML API listening on http://localhost:${port}`);
 });
 
-function getIncidentFilters(query: Record<string, unknown>): IncidentFilters | null {
+function getIncidentFilters(query: {
+  severity?: unknown;
+  status?: unknown;
+  modelId?: unknown;
+}): IncidentFilters | null {
   const severity = getEnumValue<IncidentSeverity>(query.severity, ['info', 'warning', 'critical']);
   const status = getEnumValue<IncidentStatus>(query.status, ['investigating', 'mitigating', 'resolved']);
   const modelId = getOptionalString(query.modelId);
@@ -69,6 +94,33 @@ function getIncidentFilters(query: Record<string, unknown>): IncidentFilters | n
     severity: severity ?? undefined,
     status: status ?? undefined,
     modelId: modelId ?? undefined
+  };
+}
+
+function getCreateSavedDashboardViewInput(value: unknown): CreateSavedDashboardViewInput | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const payload = value as {
+    name?: unknown;
+    state?: DashboardViewState;
+  };
+  const name = typeof payload.name === 'string' ? payload.name.trim() : '';
+  if (!name) {
+    return null;
+  }
+
+  const incidents = getIncidentFilters(payload.state?.incidents ?? {});
+  if (incidents === null) {
+    return null;
+  }
+
+  return {
+    name,
+    state: {
+      incidents: incidents ?? {}
+    }
   };
 }
 

@@ -7,3 +7,19 @@ export async function apiFetch<T>(path: string): Promise<T> {
   }
   return response.json() as Promise<T>;
 }
+
+export async function apiPost<TResponse, TBody>(path: string, body: TBody): Promise<TResponse> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return response.json() as Promise<TResponse>;
+}

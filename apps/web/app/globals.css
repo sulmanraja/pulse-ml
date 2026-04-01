@@ -74,6 +74,7 @@ a { color: inherit; text-decoration: none; }
   cursor: pointer;
 }
 .button:hover { border-color: var(--info); }
+.button-secondary { background: transparent; }
 .badge { display: inline-flex; padding: 4px 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); }
 .badge.ok { color: var(--ok); }
 .badge.warn { color: var(--warn); }
@@ -81,6 +82,7 @@ a { color: inherit; text-decoration: none; }
 .badge.info { color: var(--info); }
 .spark { height: 10px; border-radius: 999px; background: linear-gradient(90deg, #76b7ff 0%, #f4c542 65%, #ff6b6b 100%); opacity: 0.85; }
 .kv { display: grid; grid-template-columns: 140px 1fr; gap: 8px; font-size: 14px; }
+.deployment-correlation { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .stack-list { display: grid; gap: 10px; }
 .stack-item { border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; background: var(--panel-soft); }
 .stack-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
@@ -88,10 +90,85 @@ a { color: inherit; text-decoration: none; }
 .stack-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 8px; color: var(--muted); font-size: 13px; }
 .stack-detail { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
 .stack-note { margin: 10px 0 0; font-size: 13px; line-height: 1.45; }
+.incidents-page { align-content: start; }
+.filter-card { padding: 14px 18px 18px; }
+.incident-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 14px;
+  align-items: end;
+}
+.filter-field { display: grid; gap: 8px; }
+.filter-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.select {
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-soft);
+  color: var(--text);
+  padding: 0 12px;
+}
+.incidents-results-card { padding: 16px 18px 18px; }
+.incident-list { display: grid; gap: 12px; }
+.incident-row-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel-soft);
+  padding: 14px 16px;
+}
+.incident-row-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+.incident-row-title { font-size: 16px; font-weight: 600; line-height: 1.35; }
+.incident-link:hover { color: var(--info); }
+.incident-row-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.incident-row-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.95fr);
+  gap: 16px;
+  margin-top: 14px;
+}
+.incident-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+.incident-row-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-end;
+  margin-top: 14px;
+}
+.incident-description { margin: 0; max-width: 70ch; }
+.incident-detail-page { align-content: start; }
+.detail-back-link { display: flex; justify-content: flex-start; }
+.incident-detail-hero { padding: 20px 22px; }
+.incident-detail-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+.incident-detail-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.incident-detail-grid { align-items: start; }
+.incident-detail-kv { row-gap: 12px; }
+.incident-detail-copy p { margin: 8px 0 0; line-height: 1.6; }
+.deployment-detail-banner {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel-soft);
+}
 @media (max-width: 980px) {
   .layout { grid-template-columns: 1fr; }
   .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
   .header, .section-heading { align-items: start; }
   .overview-header-meta { justify-items: start; }
-  .grid-4, .grid-2, .overview-main-grid { grid-template-columns: 1fr; }
+  .grid-4, .grid-2, .overview-main-grid, .incident-row-grid { grid-template-columns: 1fr; }
+  .incident-filters { grid-template-columns: 1fr; }
+  .incident-row-top, .incident-row-footer, .incident-detail-heading { flex-direction: column; }
 }

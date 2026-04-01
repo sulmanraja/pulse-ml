@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getModels = getModels;
 exports.getIncidents = getIncidents;
+exports.getIncidentById = getIncidentById;
 exports.getDeployments = getDeployments;
 exports.getDashboard = getDashboard;
 const models = [
@@ -111,8 +112,22 @@ const deployments = [
 function getModels() {
     return models;
 }
-function getIncidents() {
-    return incidents;
+function getIncidents(filters = {}) {
+    return getCorrelatedIncidents().filter((incident) => {
+        if (filters.severity && incident.severity !== filters.severity) {
+            return false;
+        }
+        if (filters.status && incident.status !== filters.status) {
+            return false;
+        }
+        if (filters.modelId && incident.modelId !== filters.modelId) {
+            return false;
+        }
+        return true;
+    });
+}
+function getIncidentById(id) {
+    return getCorrelatedIncidents().find((incident) => incident.id === id);
 }
 function getDeployments() {
     return deployments;
@@ -120,16 +135,52 @@ function getDeployments() {
 function getDashboard() {
     const healthyModels = models.filter((m) => m.status === 'healthy').length;
     const hourlyCost = models.reduce((sum, model) => sum + model.costPerHour, 0);
+    const correlatedIncidents = getCorrelatedIncidents();
     return {
         summary: {
             totalModels: models.length,
             healthyModels,
-            openIncidents: incidents.filter((i) => i.status !== 'resolved').length,
+            openIncidents: correlatedIncidents.filter((i) => i.status !== 'resolved').length,
             criticalAlerts: models.filter((m) => m.status === 'critical').length,
             hourlyCost
         },
         models,
-        incidents,
+        incidents: correlatedIncidents,
         deployments
     };
+}
+function getCorrelatedIncidents() {
+    return incidents.map((incident) => ({
+        ...incident,
+        relatedDeployment: getNearestRelatedDeployment(incident)
+    }));
+}
+function getNearestRelatedDeployment(incident) {
+    const incidentTime = parseSeedTimestamp(incident.startedAt);
+    const matchingDeployments = deployments
+        .filter((deployment) => deployment.modelId === incident.modelId)
+        .map((deployment) => ({
+        deployment,
+        distance: Math.abs(parseSeedTimestamp(deployment.deployedAt) - incidentTime)
+    }))
+        .sort((left, right) => left.distance - right.distance);
+    const match = matchingDeployments[0]?.deployment;
+    if (!match) {
+        return undefined;
+    }
+    return {
+        id: match.id,
+        version: match.version,
+        deployedAt: match.deployedAt,
+        rolloutPercent: match.rolloutPercent,
+        riskLevel: match.riskLevel
+    };
+}
+function parseSeedTimestamp(value) {
+    const match = value.match(/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2}) (?<hour>\d{2}):(?<minute>\d{2}) [A-Z]{2}$/);
+    if (!match?.groups) {
+        return Number.NEGATIVE_INFINITY;
+    }
+    const { year, month, day, hour, minute } = match.groups;
+    return Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
 }

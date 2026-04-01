@@ -127,8 +127,20 @@ export default async function OverviewPage() {
                     </div>
                     <div className="stack-detail">
                       <span className="badge info">{incident.status}</span>
+                      {incident.relatedDeployment ? (
+                        <span className={`badge ${incident.relatedDeployment.riskLevel === 'critical' ? 'critical' : incident.relatedDeployment.riskLevel === 'warning' ? 'warn' : 'ok'}`}>
+                          Deploy {incident.relatedDeployment.version}
+                        </span>
+                      ) : (
+                        <span className="badge info">No nearby deployment</span>
+                      )}
                       <span className="muted">{incident.suspectedCause}</span>
                     </div>
+                    {incident.relatedDeployment ? (
+                      <p className="muted stack-note">
+                        Nearest deployment at {incident.relatedDeployment.deployedAt} with {incident.relatedDeployment.rolloutPercent}% rollout.
+                      </p>
+                    ) : null}
                   </article>
                 ))}
               </div>

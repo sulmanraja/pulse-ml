@@ -9,6 +9,7 @@
 - Express API for local simplicity
 - In-memory repository now, easy to replace with Postgres later
 - Aggregates model summaries, incidents, deployments, and alerts
+- Saved dashboard views use an in-memory repository interface so persistence can move to Postgres later
 
 ## Data model
 Core entities:
@@ -17,6 +18,7 @@ Core entities:
 - Alert
 - Incident
 - DeploymentEvent
+- SavedDashboardView
 
 ## Planned upgrades
 - NestJS or Spring Boot service split

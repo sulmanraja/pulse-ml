@@ -37,6 +37,19 @@ export interface IncidentFilters {
     status?: IncidentStatus;
     modelId?: string;
 }
+export interface DashboardViewState {
+    incidents: IncidentFilters;
+}
+export interface SavedDashboardView {
+    id: string;
+    name: string;
+    state: DashboardViewState;
+    createdAt: string;
+}
+export interface CreateSavedDashboardViewInput {
+    name: string;
+    state: DashboardViewState;
+}
 export interface DeploymentEvent {
     id: string;
     modelId: string;

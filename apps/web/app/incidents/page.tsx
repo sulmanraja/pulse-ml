@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { Incident, IncidentSeverity, IncidentStatus, ModelSummary } from '@pulseml/shared';
+import { Incident, IncidentSeverity, IncidentStatus, ModelSummary, SavedDashboardView } from '@pulseml/shared';
 import { apiFetch } from '../../components/api';
 import { EmptyState } from '../../components/EmptyState';
+import { SavedViewsPanel } from '../../components/SavedViewsPanel';
 
 type IncidentsPageProps = {
   searchParams?: Promise<{
@@ -28,9 +29,16 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
   }
   const queryString = incidentQuery.toString();
 
-  const [incidents, models] = await Promise.all([
+  const currentFilters = {
+    severity,
+    status,
+    modelId
+  };
+
+  const [incidents, models, savedViews] = await Promise.all([
     apiFetch<Incident[]>(`/incidents${queryString ? `?${queryString}` : ''}`),
-    apiFetch<ModelSummary[]>('/models')
+    apiFetch<ModelSummary[]>('/models'),
+    apiFetch<SavedDashboardView[]>('/saved-views')
   ]);
 
   return (
@@ -83,6 +91,8 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
           </div>
         </form>
       </section>
+
+      <SavedViewsPanel currentFilters={currentFilters} initialViews={savedViews} />
 
       <section className="card incidents-results-card">
         <div className="section-heading">

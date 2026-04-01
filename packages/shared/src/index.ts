@@ -2,6 +2,7 @@ export type HealthStatus = 'healthy' | 'warning' | 'critical';
 export type IncidentSeverity = 'info' | 'warning' | 'critical';
 export type IncidentStatus = 'investigating' | 'mitigating' | 'resolved';
 export type DriftTimeframe = '24h' | '7d' | '30d';
+export type DemoRole = 'ml-engineer' | 'data-scientist' | 'platform-engineer' | 'admin';
 
 export interface ModelSummary {
   id: string;

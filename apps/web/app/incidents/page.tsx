@@ -3,12 +3,14 @@ import { Incident, IncidentSeverity, IncidentStatus, ModelSummary, SavedDashboar
 import { apiFetch } from '../../components/api';
 import { EmptyState } from '../../components/EmptyState';
 import { SavedViewsPanel } from '../../components/SavedViewsPanel';
+import { buildRoleHref, canSaveViews, getDemoRole, getDemoRoleMeta } from '../../components/demoRole';
 
 type IncidentsPageProps = {
   searchParams?: Promise<{
     severity?: string;
     status?: string;
     modelId?: string;
+    role?: string;
   }>;
 };
 
@@ -17,6 +19,8 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
   const severity = getValidSeverity(params.severity);
   const status = getValidStatus(params.status);
   const modelId = typeof params.modelId === 'string' ? params.modelId : undefined;
+  const role = getDemoRole(params.role);
+  const roleMeta = getDemoRoleMeta(role);
   const incidentQuery = new URLSearchParams();
   if (severity) {
     incidentQuery.set('severity', severity);
@@ -48,11 +52,15 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
           <h2 className="title">Incidents</h2>
           <p className="subtitle">Filter by severity, status, and impacted model to move from triage to root cause quickly.</p>
         </div>
-        <div className="badge info">Demo mode · seeded data</div>
+        <div className="overview-header-meta">
+          <div className="badge info">Demo mode · seeded data</div>
+          <div className="muted">{roleMeta.label}</div>
+        </div>
       </header>
 
       <section className="card filter-card">
         <form className="incident-filters" method="get">
+          <input type="hidden" name="role" value={role} />
           <label className="filter-field">
             <span className="muted tooltip-label" title="Filter incidents by impact level, from informational to critical.">Severity</span>
             <select name="severity" defaultValue={severity ?? ''} className="select">
@@ -87,12 +95,12 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
 
           <div className="filter-actions">
             <button className="button" type="submit">Apply filters</button>
-            <Link className="button button-secondary" href="/incidents">Clear</Link>
+            <Link className="button button-secondary" href={buildRoleHref('/incidents', role)}>Clear</Link>
           </div>
         </form>
       </section>
 
-      <SavedViewsPanel currentFilters={currentFilters} initialViews={savedViews} />
+      <SavedViewsPanel currentFilters={currentFilters} initialViews={savedViews} role={role} />
 
       <section className="card incidents-results-card">
         <div className="section-heading">
@@ -100,7 +108,7 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
             <h3 className="tooltip-label" title="The current incident queue after server-side filtering by severity, status, and model.">Incident Queue</h3>
             <p className="muted section-subtitle">{incidents.length} incidents match the current filters.</p>
           </div>
-          <div className="section-chip">Server-filtered</div>
+          <div className="section-chip">{canSaveViews(role) ? 'Editable triage' : 'Role-scoped view'}</div>
         </div>
 
         {incidents.length === 0 ? (
@@ -115,7 +123,7 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
                 <div className="incident-row-top">
                   <div>
                     <div className="incident-row-title">
-                      <Link href={`/incidents/${incident.id}`} className="incident-link">
+                      <Link href={buildRoleHref(`/incidents/${incident.id}`, role)} className="incident-link">
                         {incident.title}
                       </Link>
                     </div>
@@ -155,7 +163,7 @@ export default async function IncidentsPage({ searchParams }: IncidentsPageProps
 
                 <div className="incident-row-footer">
                   <p className="muted incident-description">{incident.description}</p>
-                  <Link href={`/incidents/${incident.id}`} className="button button-secondary">
+                  <Link href={buildRoleHref(`/incidents/${incident.id}`, role)} className="button button-secondary">
                     View details
                   </Link>
                 </div>

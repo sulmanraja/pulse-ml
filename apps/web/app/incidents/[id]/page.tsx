@@ -2,15 +2,22 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Incident } from '@pulseml/shared';
 import { apiFetch } from '../../../components/api';
+import { buildRoleHref, getDemoRole, getDemoRoleMeta } from '../../../components/demoRole';
 
 type IncidentDetailPageProps = {
   params: Promise<{
     id: string;
   }>;
+  searchParams?: Promise<{
+    role?: string;
+  }>;
 };
 
-export default async function IncidentDetailPage({ params }: IncidentDetailPageProps) {
+export default async function IncidentDetailPage({ params, searchParams }: IncidentDetailPageProps) {
   const { id } = await params;
+  const query = (await searchParams) ?? {};
+  const role = getDemoRole(query.role);
+  const roleMeta = getDemoRoleMeta(role);
 
   let incident: Incident;
   try {
@@ -26,7 +33,7 @@ export default async function IncidentDetailPage({ params }: IncidentDetailPageP
   return (
     <div className="grid incident-detail-page" style={{ gap: 20 }}>
       <div className="detail-back-link">
-        <Link href="/incidents" className="button button-secondary">Back to incidents</Link>
+        <Link href={buildRoleHref('/incidents', role)} className="button button-secondary">Back to incidents</Link>
       </div>
 
       <header className="card incident-detail-hero">
@@ -37,6 +44,7 @@ export default async function IncidentDetailPage({ params }: IncidentDetailPageP
             <p className="subtitle">Detailed triage context for the impacted model and its nearest deployment change.</p>
           </div>
           <div className="incident-detail-badges">
+            <span className="badge info">{roleMeta.label}</span>
             <span className={`badge ${incident.severity === 'critical' ? 'critical' : incident.severity === 'warning' ? 'warn' : 'info'}`}>{incident.severity}</span>
             <span className="badge info">{incident.status}</span>
           </div>
